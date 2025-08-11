@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react"
 
-// Static skills used by the Expertise filter and the registration form.
-// Keeping this constant ensures the dropdown never renders empty.
 const ALL_SKILLS = [
   "AI",
   "ML",
@@ -15,8 +13,6 @@ const ALL_SKILLS = [
   "Mobile",
 ]
 
-// Demo seed so the directory isn’t empty on first load.
-// Replace with GET /api/judges later.
 const INITIAL_JUDGES = [
   { id: 1, name: "Ava Singh", email: "ava@example.com", org: "TechU", expertise: ["AI", "ML"], available: true },
   { id: 2, name: "Liam Chen", email: "liam@example.com", org: "FinLab", expertise: ["FinTech", "Data"], available: false },
@@ -24,15 +20,12 @@ const INITIAL_JUDGES = [
 ]
 
 export default function Judges() {
-  // Directory data
   const [list, setList] = useState(INITIAL_JUDGES)
 
-  // Filters
   const [q, setQ] = useState("")
-  const [availability, setAvailability] = useState("All") // "All" | "Available" | "Busy"
-  const [skillFilter, setSkillFilter] = useState("All")   // "All" | any from ALL_SKILLS
+  const [availability, setAvailability] = useState("All")
+  const [skillFilter, setSkillFilter] = useState("All")
 
-  // Registration form state
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -46,7 +39,6 @@ export default function Judges() {
   const [msg, setMsg] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
-  // Derived: filtered judges for display
   const filtered = useMemo(() => {
     let d = [...list]
     if (q) {
@@ -67,11 +59,9 @@ export default function Judges() {
     return d
   }, [list, q, availability, skillFilter])
 
-  // Toggle availability on a judge card
   const toggleAvailability = (id) =>
     setList((s) => s.map((j) => (j.id === id ? { ...j, available: !j.available } : j)))
 
-  // Registration helpers
   const toggleExpertise = (skill) =>
     setForm((f) => {
       const on = f.expertise.includes(skill)
@@ -96,11 +86,6 @@ export default function Judges() {
     if (Object.keys(v).length) return
     setSubmitting(true)
     try {
-      // TODO: replace with real POST /api/judges
-      // const res = await fetch("/api/judges", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) })
-      // const created = await res.json()
-
-      // Local optimistic create (demo)
       const created = {
         id: Math.max(0, ...list.map((x) => x.id)) + 1,
         name: form.name.trim(),
@@ -123,46 +108,34 @@ export default function Judges() {
     <section className="max-w-7xl mx-auto px-6 py-16">
       <h1 className="text-3xl font-bold text-pink-300 mb-6">Judges</h1>
 
-      {/* Filter Bar */}
+      {/* Filters */}
       <div className="card p-4 mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-3">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, email, or org…"
-            className="px-4 py-2 rounded-md bg-white/10 border border-white/15"
+            className="px-4 py-2 rounded-md bg-[#1a1b22] border border-white/25 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-pink-400/60"
             aria-label="Search judges"
           />
-          <select
-            value={availability}
-            onChange={(e) => setAvailability(e.target.value)}
-            className="px-4 py-2 rounded-md bg-white/10 border border-white/15"
-            aria-label="Filter by availability"
-          >
+          <Select value={availability} onChange={setAvailability}>
             <option>All</option>
             <option>Available</option>
             <option>Busy</option>
-          </select>
-          <select
-            value={skillFilter}
-            onChange={(e) => setSkillFilter(e.target.value)}
-            className="px-4 py-2 rounded-md bg-white/10 border border-white/15"
-            aria-label="Filter by expertise"
-          >
+          </Select>
+          <Select value={skillFilter} onChange={setSkillFilter}>
             <option>All</option>
             {ALL_SKILLS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
+              <option key={s} value={s}>{s}</option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="text-sm text-white/60">Total: {filtered.length}</div>
       </div>
 
-      {/* Grid: Directory + Registration */}
+      {/* Grid */}
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Directory (2 columns on desktop) */}
+        {/* Directory */}
         <div className="lg:col-span-2">
           <div className="grid gap-6 sm:grid-cols-2">
             {filtered.map((j) => (
@@ -180,11 +153,7 @@ export default function Judges() {
                       ))}
                     </div>
                   </div>
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs ${
-                      j.available ? "bg-green-500/20 text-green-300" : "bg-yellow-500/20 text-yellow-300"
-                    }`}
-                  >
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs ${j.available ? "bg-green-500/20 text-green-300" : "bg-yellow-500/20 text-yellow-300"}`}>
                     {j.available ? "Available" : "Busy"}
                   </span>
                 </div>
@@ -210,58 +179,44 @@ export default function Judges() {
           <p className="text-white/70 text-sm mt-1">Add new judges with expertise and availability.</p>
 
           <form onSubmit={submit} className="mt-4 space-y-4" noValidate>
-            {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm mb-1">
-                Name
-              </label>
+              <label htmlFor="name" className="block text-sm mb-1">Name</label>
               <input
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className={`w-full px-4 py-3 rounded-md bg-white/10 border ${
-                  errors.name ? "border-red-400" : "border-white/15"
-                }`}
+                className={`w-full px-4 py-3 rounded-md bg-white/10 border ${errors.name ? "border-red-400" : "border-white/15"} text-white`}
                 placeholder="Full name"
                 aria-invalid={!!errors.name}
               />
               {errors.name && <p className="text-red-300 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm mb-1">
-                Email
-              </label>
+              <label htmlFor="email" className="block text-sm mb-1">Email</label>
               <input
                 id="email"
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className={`w-full px-4 py-3 rounded-md bg-white/10 border ${
-                  errors.email ? "border-red-400" : "border-white/15"
-                }`}
+                className={`w-full px-4 py-3 rounded-md bg-white/10 border ${errors.email ? "border-red-400" : "border-white/15"} text-white`}
                 placeholder="name@example.com"
                 aria-invalid={!!errors.email}
               />
               {errors.email && <p className="text-red-300 text-xs mt-1">{errors.email}</p>}
             </div>
 
-            {/* Organization */}
-            <div className="grid grid-cols-1">
-              <label htmlFor="org" className="block text-sm mb-1">
-                Organization (optional)
-              </label>
+            <div>
+              <label htmlFor="org" className="block text-sm mb-1">Organization (optional)</label>
               <input
                 id="org"
                 value={form.org}
                 onChange={(e) => setForm({ ...form, org: e.target.value })}
-                className="w-full px-4 py-3 rounded-md bg-white/10 border border-white/15"
+                className="w-full px-4 py-3 rounded-md bg-white/10 border border-white/15 text-white"
                 placeholder="Company / Institution"
               />
             </div>
 
-            {/* Expertise chips */}
             <div>
               <span className="block text-sm mb-2">Expertise</span>
               <div className="flex flex-wrap gap-2">
@@ -287,58 +242,42 @@ export default function Judges() {
               {errors.expertise && <p className="text-red-300 text-xs mt-1">{errors.expertise}</p>}
             </div>
 
-            {/* Bio */}
             <div>
-              <label htmlFor="bio" className="block text-sm mb-1">
-                Bio (optional)
-              </label>
+              <label htmlFor="bio" className="block text-sm mb-1">Bio (optional)</label>
               <textarea
                 id="bio"
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                className="w-full px-4 py-3 rounded-md bg-white/10 border border-white/15 min-h-[90px]"
+                className="w-full px-4 py-3 rounded-md bg-white/10 border border-white/15 min-h-[90px] text-white"
                 placeholder="Short bio or judging focus"
               />
             </div>
 
-            {/* Availability switch */}
             <div className="flex items-center justify-between">
               <label className="text-sm">Available to judge</label>
               <button
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, available: !f.available }))}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-                  form.available ? "bg-green-500/60" : "bg-white/20"
-                }`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${form.available ? "bg-green-500/60" : "bg-white/20"}`}
                 aria-pressed={form.available}
                 aria-label="Toggle availability"
               >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
-                    form.available ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${form.available ? "translate-x-6" : "translate-x-1"}`} />
               </button>
             </div>
 
-            {/* Passcode */}
             <div>
-              <label htmlFor="passcode" className="block text-sm mb-1">
-                Judge passcode (optional)
-              </label>
+              <label htmlFor="passcode" className="block text-sm mb-1">Judge passcode (optional)</label>
               <input
                 id="passcode"
                 value={form.passcode}
                 onChange={(e) => setForm({ ...form, passcode: e.target.value })}
-                className={`w-full px-4 py-3 rounded-md bg-white/10 border ${
-                  errors.passcode ? "border-red-400" : "border-white/15"
-                }`}
+                className={`w-full px-4 py-3 rounded-md bg-white/10 border ${errors.passcode ? "border-red-400" : "border-white/15"} text-white`}
                 placeholder="If organizer requires a code"
               />
               {errors.passcode && <p className="text-red-300 text-xs mt-1">{errors.passcode}</p>}
             </div>
 
-            {/* Submit */}
             <button
               disabled={submitting}
               className="w-full px-4 py-3 rounded-md bg-pink-500 hover:bg-pink-400 font-semibold disabled:opacity-60"
@@ -359,5 +298,32 @@ export default function Judges() {
         </aside>
       </div>
     </section>
+  )
+}
+
+function Select({ value, onChange, children }) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="appearance-none pr-9 px-4 py-2 rounded-md bg-[#1a1b22] border border-white/25 text-white focus:outline-none focus:ring-2 focus:ring-pink-400/60"
+      >
+        {children}
+      </select>
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-white/80"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path d="M5.25 7.5l4.5 4.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <style>{`
+        select option { color: #ffffff; background: #0e0f14; }
+        select option:checked { background: #2a2b36; }
+        select option:hover { background: #232432; }
+      `}</style>
+    </div>
   )
 }
