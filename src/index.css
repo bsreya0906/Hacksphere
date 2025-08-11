@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fancy gradient background */
+.bg-hero {
+  background: radial-gradient(1200px 600px at 10% -10%, rgba(255,0,127,0.25), transparent 60%),
+              radial-gradient(1000px 600px at 90% 10%, rgba(10,109,191,0.25), transparent 60%),
+              linear-gradient(135deg, #1f1c2c 0%, #0a0a0a 100%);
+}
+
+/* Card hover scale */
+.card {
+  @apply rounded-2xl bg-[#151521] border border-white/10 shadow-lg hover:shadow-glow hover:scale-[1.02] transition transform-gpu;
+}
